@@ -1,0 +1,50 @@
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: kku-library-db
+    environment:
+      POSTGRES_DB: kku_library
+      POSTGRES_USER: kku
+      POSTGRES_PASSWORD: kku_password
+    ports:
+      - "5433:5432" # ภายนอกใช้ 5433 เข้าหาภายใน 5432
+    volumes:
+      - kku_database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kku -d kku_library"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks:
+      - kku-network
+
+  backend:
+    build: ./express-db-ws1
+    container_name: kku-library-api
+    ports:
+      - "3000:3000" # แก้ให้ตรงกับ Port 3000 ที่คุณใช้
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      - DB_HOST=database
+      - DB_PORT=5432
+    networks:
+      - kku-network
+
+  frontend:
+    build: ./kku-library-web
+    container_name: kku-library-frontend
+    ports:
+      - "3001:3001" # แก้เป็น 3001 ตามที่คุณต้องการ
+    depends_on:
+      - backend
+    networks:
+      - kku-network
+
+networks:
+  kku-network:
+    driver: bridge
+
+volumes:
+  kku_database:
