@@ -14,6 +14,7 @@ RUN npm install
 COPY . .
 
 # 6. บิลด์โปรเจกต์ให้เป็น Production (ขั้นตอนนี้สำคัญที่สุดเพื่อประหยัดแรมตอนรัน)
+ENV NODE_OPTIONS=--max-old-space-size=400
 RUN npm run build
 
 # 7. เปิดพอร์ต 10000 ตามมาตรฐาน Render
