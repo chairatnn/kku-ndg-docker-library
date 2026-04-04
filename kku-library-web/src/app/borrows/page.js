@@ -16,7 +16,7 @@ export default function BorrowPage() {
   const [dueDate, setDueDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const API_BASE = "http://localhost:3000/api";
+  const API_BASE = "/api";
 
   useEffect(() => {
     // กำหนดค่าเริ่มต้นเป็น 7 วันนับจากวันนี้
@@ -69,7 +69,7 @@ export default function BorrowPage() {
     setSubmitting(true);
     try {
       const token = localStorage.getItem("accessToken");
-      const resp = await fetch("http://localhost:3000/api/borrows", {
+      const resp = await fetch(`${API_BASE}/borrows`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

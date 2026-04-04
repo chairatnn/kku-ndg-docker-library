@@ -17,7 +17,7 @@ export default function BooksPage() {
   const debounceRef = useRef(null);
 
   // กำหนด Base URL ไว้ที่เดียวจะได้แแก้รวดเดียวจบ
-  const API_BASE = "http://localhost:3000/api";
+  const API_BASE = "/api";
 
   const loadBooks = async (query = "", showLoading = true) => {
     if (showLoading) setLoading(true);

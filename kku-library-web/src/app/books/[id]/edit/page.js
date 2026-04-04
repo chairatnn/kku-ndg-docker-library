@@ -9,7 +9,7 @@ import ProtectedRoute from "../../../components/ProtectedRoute";
 export default function EditBookPage() {
   const { id } = useParams();
   const router = useRouter();
-  const API_BASE = "http://localhost:3000/api"; // ยิงตรงหา Express
+  const API_BASE = "/api";
 
   const [form, setForm] = useState({
     title: "",

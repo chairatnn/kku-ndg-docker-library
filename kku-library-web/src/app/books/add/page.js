@@ -51,28 +51,6 @@ export default function AddBookPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // ฟังก์ชัน onSubmit (เตรียมส่งไป Step 4)
-  //   const onSubmit = async (e) => {
-  //     e.preventDefault();
-
-  //     if (!validateForm()) {
-  //       setToastVariant('error');
-  //       setToastMessage('กรุณากรอกข้อมูลให้ครบถ้วน');
-  //       setToastOpen(true);
-  //       return;
-  //     }
-
-  //     setSubmitting(true);
-  //     // TODO: Fetch API (จะอยู่ใน Step 4)
-  //     console.log('ข้อมูลที่จะส่ง:', form);
-
-  //     // ตัวอย่างจำลองการทำงาน
-  //     setTimeout(() => {
-  //         setSubmitting(false);
-  //         // router.push('/books');
-  //     }, 1000);
-  //   };
-
   const onSubmit = async (e) => {
     e.preventDefault();
 
@@ -83,7 +61,7 @@ export default function AddBookPage() {
 
     try {
       // ยิงไปที่ Backend Port 3000
-      const resp = await fetch("http://localhost:3000/api/books", {
+      const resp = await fetch("/api/books", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

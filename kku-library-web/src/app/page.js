@@ -1,47 +1,3 @@
-// import Link from 'next/link';
-// import Image from 'next/image';
-// import ProtectedRoute from './components/ProtectedRoute';
-
-// const quickLinks = [
-//   { label: 'Books', href: '/books', description: 'ดูหน้ารายการหนังสือใน App Router' },
-//   { label: 'My Profile', href: '/me', description: 'ตรวจสอบข้อมูลผู้ใช้จาก /api/me' },
-//   { label: 'Health', href: '/health', description: 'เช็กสถานะการเชื่อมต่อ API ของระบบ' },
-// ];
-
-// export default function HomePage() {
-//   return (
-//     <ProtectedRoute>
-//       <main className="space-y-6">
-//         <div className="relative h-48 w-full overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 shadow-sm">
-//           <Image src="/images/demo.png" alt="KKU Library" fill className="object-cover" priority />
-//           <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-900/40 to-transparent" />
-//           <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-//             <p className="text-sm font-medium text-slate-200">Dashboard</p>
-//             <h1 className="mt-1 text-3xl font-bold tracking-tight">KKU Library</h1>
-//             <p className="mt-2 max-w-xl text-sm text-slate-200">
-//               หน้าหลักหลัง login สำหรับพาไปยัง flow สำคัญของ workshop
-//             </p>
-//           </div>
-//         </div>
-
-//         <div className="grid gap-4 md:grid-cols-3">
-//           {quickLinks.map((item) => (
-//             <Link
-//               key={item.href}
-//               href={item.href}
-//               className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-transform hover:-translate-y-0.5 hover:border-slate-300"
-//             >
-//               <h2 className="text-base font-semibold text-slate-900">{item.label}</h2>
-//               <p className="mt-2 text-sm text-slate-600">{item.description}</p>
-//             </Link>
-//           ))}
-//         </div>
-//       </main>
-//     </ProtectedRoute>
-//   );
-// }
-
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -59,7 +15,7 @@ export default function DashboardPage() {
     const fetchDashboard = async () => {
       try {
         const token = localStorage.getItem("accessToken");
-        const resp = await fetch("http://localhost:3000/api/dashboard/stats", {
+        const resp = await fetch("/api/dashboard/stats", {
           headers: { "Authorization": `Bearer ${token}` }
         });
         const result = await resp.json();

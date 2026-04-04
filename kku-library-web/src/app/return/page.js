@@ -18,7 +18,7 @@ export default function ReturnPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(null); // เก็บ ID ที่กำลังกดคืน
 
-  const API_BASE = "http://localhost:3000/api";
+  const API_BASE = "/api";
 
   // 1. โหลดข้อมูลรายการยืมทั้งหมด
   const loadBorrows = async () => {
