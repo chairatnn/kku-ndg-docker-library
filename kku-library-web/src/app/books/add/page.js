@@ -17,6 +17,7 @@ export default function AddBookPage() {
     author: "",
     category: "",
     isbn: "",
+    description: form.description
   };
 
   const [form, setForm] = useState(initialForm);
