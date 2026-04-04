@@ -1,14 +1,33 @@
-const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000'; // Express.js (Frontend)
+// src/app/api/users/route.js
+import { NextResponse } from 'next/server';
 
 export async function POST(request) {
-  const body = await request.json();
+  try {
+    const body = await request.json();
+    
+    // เปลี่ยนมาใช้ชื่อที่ตั้งไว้ใน Vercel Settings
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const resp = await fetch(`${API_BASE_URL}/users`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+    if (!backendUrl) {
+      console.error("Missing NEXT_PUBLIC_API_URL");
+      return NextResponse.json({ message: "Server configuration error" }, { status: 500 });
+    }
 
-  const data = await resp.json();
-  return Response.json(data, { status: resp.status });
+    // ยิงไปที่ Render (https://kku-library-api.onrender.com/users)
+    const resp = await fetch(`${backendUrl}/users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    const data = await resp.json();
+    return NextResponse.json(data, { status: resp.status });
+
+  } catch (error) {
+    console.error("Create User Proxy Error:", error);
+    return NextResponse.json(
+      { message: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้", error: error.message },
+      { status: 500 }
+    );
+  }
 }
