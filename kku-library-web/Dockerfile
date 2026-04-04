@@ -1,20 +1,23 @@
-# ใช้ Node.js version 20 บน Alpine Linux
+# 1. ใช้ Node.js version 20
 FROM node:20-alpine
 
-# กำหนดโฟลเดอร์ทำงานภายใน Container
+# 2. กำหนดโฟลเดอร์ทำงาน
 WORKDIR /app
 
-# คัดลอกไฟล์จัดการ package
+# 3. คัดลอกไฟล์จัดการ package
 COPY package*.json ./
 
-# ติดตั้ง dependencies
+# 4. ติดตั้ง dependencies
 RUN npm install
 
-# คัดลอกซอร์สโค้ดทั้งหมด
+# 5. คัดลอกซอร์สโค้ดทั้งหมด
 COPY . .
 
-# เปิดพอร์ต 3001 ตามที่คุณใช้งาน
-EXPOSE 3001
+# 6. บิลด์โปรเจกต์ให้เป็น Production (ขั้นตอนนี้สำคัญที่สุดเพื่อประหยัดแรมตอนรัน)
+RUN npm run build
 
-# สั่งรันแอปพลิเคชัน (สำหรับ React/Next.js มักใช้ npm run dev หรือ npm start)
-CMD ["npm", "run", "dev", "--", "--port", "3001", "--host", "0.0.0.0"]
+# 7. เปิดพอร์ต 10000 ตามมาตรฐาน Render
+EXPOSE 10000
+
+# 8. สั่งรันในโหมด Production และบังคับพอร์ต 10000
+CMD ["npm", "run", "start", "--", "-p", "10000"]
