@@ -10,7 +10,7 @@ export async function GET(request) {
       throw new Error("NEXT_PUBLIC_API_URL is missing");
     }
 
-    // ยิงไปที่ Render (เช่น https://...render.com/me)
+
     const resp = await fetch(`${backendUrl}/me`, {
       method: 'GET',
       headers: {
