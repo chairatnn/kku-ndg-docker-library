@@ -1,33 +1,32 @@
 // src/app/api/borrows/route.js
 import { NextResponse } from 'next/server';
 
-// ดึง URL ของ Backend (Render) จาก Environment Variable
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function POST(request) {
   try {
-    // 1. รับ Token จาก Header และข้อมูลการยืมจาก Frontend
     const authHeader = request.headers.get('authorization');
     const body = await request.json();
 
     if (!BACKEND_URL) {
-      throw new Error("NEXT_PUBLIC_API_URL is not defined");
+      throw new Error("NEXT_PUBLIC_API_URL is not defined in Vercel settings");
     }
 
-    // 2. Forward ต่อไปยัง Render พร้อมแนบ Token และข้อมูลการยืม
-    // ตัวอย่าง URL: https://kku-library-api.onrender.com/borrows
-    const resp = await fetch(`${BACKEND_URL}/borrows`, {
+    // --- แก้ไข Path ให้ตรงกับ Backend (เติม /api เข้าไป) ---
+    const targetUrl = `${BACKEND_URL}/api/borrows`;
+
+    const resp = await fetch(targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': authHeader || '', // ส่งต่อ Token (Bearer ...) ไปให้ Render เช็คสิทธิ์
+        // ส่งต่อ Token เพื่อให้ Backend (Render) ตรวจสอบว่าใครเป็นคนยืม
+        ...(authHeader ? { 'Authorization': authHeader } : {}),
       },
       body: JSON.stringify(body),
     });
 
-    const data = await resp.json();
+    const data = await resp.json().catch(() => ({}));
 
-    // 3. ส่งผลลัพธ์กลับไปที่ Frontend
     if (!resp.ok) {
       return NextResponse.json(
         { message: data.message || 'ไม่สามารถดำเนินการยืมได้' },

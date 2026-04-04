@@ -6,31 +6,27 @@ export async function POST(request, { params }) {
     const backendUrl = process.env.NEXT_PUBLIC_API_URL;
     const authHeader = request.headers.get('authorization');
     
-    // 1. ดึง borrowId ออกมา (Next.js 15 ต้อง await params)
-    const resolvedParams = await params;
-    const borrowId = resolvedParams.borrowId;
-
-    if (!borrowId) {
-      return NextResponse.json({ message: 'ไม่พบรหัสการยืม' }, { status: 400 });
-    }
+    // ถูกต้อง: Next.js 15 ต้อง await params
+    const { borrowId } = await params;
 
     if (!backendUrl) {
-      throw new Error("NEXT_PUBLIC_API_URL is missing");
+      throw new Error("NEXT_PUBLIC_API_URL is missing in Vercel settings");
     }
 
-    // 2. ส่งต่อไปยัง Render (ตรวจสอบ Path /api/returns ให้ตรงกับ app.js)
-    // สมมติว่าใน app.js ใช้ app.use('/api/returns', ...)
-    const resp = await fetch(`${backendUrl}/api/returns/${borrowId}`, {
+    // --- ตรวจสอบ Path นี้กับ src/app.js ใน Backend อีกครั้ง ---
+    const targetUrl = `${backendUrl}/api/returns/${borrowId}`;
+
+    const resp = await fetch(targetUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': authHeader || '', 
+        'Authorization': authHeader || '', // Forward Token เพื่อเช็คสิทธิ์ Librarian
       },
+      // การคืนหนังสือส่วนใหญ่ไม่ต้องการ Body เพราะใช้ ID จาก URL
     });
 
-    const data = await resp.json();
+    const data = await resp.json().catch(() => ({}));
     
-    // 3. ส่งผลลัพธ์กลับไปที่ Frontend
     if (!resp.ok) {
       return NextResponse.json(
         { message: data.message || 'คืนหนังสือไม่สำเร็จ' }, 
@@ -43,7 +39,7 @@ export async function POST(request, { params }) {
   } catch (error) {
     console.error("[Return API Proxy Error]:", error.message);
     return NextResponse.json(
-      { message: 'เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์หลัก', error: error.message }, 
+      { message: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์เพื่อคืนหนังสือได้', error: error.message }, 
       { status: 500 }
     );
   }

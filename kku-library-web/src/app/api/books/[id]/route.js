@@ -1,25 +1,26 @@
-// src/app/api/books/[id]/route.js
 import { NextResponse } from "next/server";
 
-// แนะนำให้ดึงจาก Environment Variable ที่เราตั้งไว้ใน Vercel
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // --- 1. GET: ดึงข้อมูลหนังสือรายเล่ม ---
 export async function GET(req, { params }) {
-  const { id } = params;
+  // 1. Next.js 15 ต้อง await params
+  const { id } = await params;
 
   try {
-    if (!BACKEND_URL) throw new Error("NEXT_PUBLIC_API_URL is missing");
+    if (!BACKEND_URL) throw new Error("NEXT_PUBLIC_API_URL is missing in Vercel");
 
-    // ยิงตรงไปที่ Render (เช่น https://...render.com/books/1)
-    const resp = await fetch(`${BACKEND_URL}/books/${id}`, {
+    // 2. เติม /api ให้ตรงกับ Backend (https://...render.com/api/books/1)
+    const targetUrl = `${BACKEND_URL}/api/books/${id}`;
+
+    const resp = await fetch(targetUrl, {
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
       },
     });
 
-    const json = await resp.json();
+    const json = await resp.json().catch(() => ({}));
 
     if (!resp.ok) {
       return NextResponse.json(
@@ -30,7 +31,7 @@ export async function GET(req, { params }) {
 
     return NextResponse.json(json);
   } catch (error) {
-    console.error("[Get Book ID Error]:", error.message);
+    console.error("[Get Book ID Proxy Error]:", error.message);
     return NextResponse.json(
       { message: "เชื่อมต่อ Backend ไม่สำเร็จ", error: error.message },
       { status: 500 }
@@ -40,25 +41,28 @@ export async function GET(req, { params }) {
 
 // --- 2. PUT: อัปเดตข้อมูลหนังสือ ---
 export async function PUT(req, { params }) {
-  const { id } = params;
+  const { id } = await params;
 
   try {
     if (!BACKEND_URL) throw new Error("NEXT_PUBLIC_API_URL is missing");
 
     const body = await req.json();
-    const authHeader = req.headers.get("authorization"); // ดึง Bearer Token จาก Frontend
+    const authHeader = req.headers.get("authorization"); 
 
-    const resp = await fetch(`${BACKEND_URL}/books/${id}`, {
+    // 3. เติม /api ให้ตรงกับ Backend
+    const targetUrl = `${BACKEND_URL}/api/books/${id}`;
+
+    const resp = await fetch(targetUrl, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        // ส่งต่อ Authorization Header ไปให้ Render เพื่อเช็คสิทธิ์ Admin
-        ...(authHeader ? { Authorization: authHeader } : {}),
+        // ส่งต่อ Token เพื่อให้ Backend เช็คว่าเป็น Admin จริงไหม
+        ...(authHeader ? { "Authorization": authHeader } : {}),
       },
       body: JSON.stringify(body),
     });
 
-    const json = await resp.json();
+    const json = await resp.json().catch(() => ({}));
 
     if (!resp.ok) {
       return NextResponse.json(
@@ -69,7 +73,7 @@ export async function PUT(req, { params }) {
 
     return NextResponse.json(json);
   } catch (error) {
-    console.error("[Update Book Error]:", error.message);
+    console.error("[Update Book Proxy Error]:", error.message);
     return NextResponse.json(
       { message: "เกิดข้อผิดพลาดในการเชื่อมต่อเครือข่าย", error: error.message },
       { status: 500 }

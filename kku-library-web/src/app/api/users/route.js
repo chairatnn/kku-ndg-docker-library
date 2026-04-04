@@ -5,7 +5,9 @@ export async function POST(request) {
   try {
     const body = await request.json();
     
-    // เปลี่ยนมาใช้ชื่อที่ตั้งไว้ใน Vercel Settings
+    // 1. ดึง Authorization Header จากหน้าบ้าน (Browser)
+    const authHeader = request.headers.get('authorization');
+
     const backendUrl = process.env.NEXT_PUBLIC_API_URL;
 
     if (!backendUrl) {
@@ -13,10 +15,14 @@ export async function POST(request) {
       return NextResponse.json({ message: "Server configuration error" }, { status: 500 });
     }
 
-    // ยิงไปที่ Render (https://kku-library-api.onrender.com/users)
+    // 2. ยิงไปที่ Render พร้อมแนบ Token ไปด้วย
     const resp = await fetch(`${backendUrl}/users`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        // --- เพิ่มบรรทัดนี้เพื่อส่งต่อ Token ---
+        ...(authHeader ? { 'Authorization': authHeader } : {}),
+      },
       body: JSON.stringify(body),
     });
 
