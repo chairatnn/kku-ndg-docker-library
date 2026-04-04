@@ -17,7 +17,6 @@ export default function AddBookPage() {
     author: "",
     category: "",
     isbn: "",
-    description: "", // เพิ่มคำอธิบายด้วยถ้าต้องการ
   };
 
   const [form, setForm] = useState(initialForm);
@@ -127,7 +126,7 @@ export default function AddBookPage() {
               name="title"
               value={form.title}
               onChange={handleChange}
-              className={`w-full rounded-xl border ${errors.title ? "border-rose-500" : "border-slate-200"} px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full rounded-xl border ${errors.title ? "border-rose-500" : "border-slate-200"} px-4 py-3 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500`}
               placeholder="ระบุชื่อหนังสือ"
             />
             {errors.title && (
@@ -145,7 +144,7 @@ export default function AddBookPage() {
               type="text"
               value={form.author}
               onChange={handleChange}
-              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 transition"
               placeholder="ระบุชื่อผู้แต่ง (ถ้ามี)"
             />
           </div>
@@ -159,7 +158,7 @@ export default function AddBookPage() {
                 name="isbn"
                 value={form.isbn}
                 onChange={handleChange}
-                className={`w-full rounded-xl border ${errors.isbn ? "border-rose-500" : "border-slate-200"} px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500`}
+                className={`w-full rounded-xl border ${errors.isbn ? "border-rose-500" : "border-slate-200"} px-4 py-3 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500`}
                 placeholder="978-..."
               />
               {errors.isbn && (
@@ -175,7 +174,7 @@ export default function AddBookPage() {
                 name="category"
                 value={form.category}
                 onChange={handleChange}
-                className={`w-full rounded-xl border ${errors.category ? "border-rose-500" : "border-slate-200"} px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-white`}
+                className={`w-full rounded-xl border ${errors.category ? "border-rose-500" : "border-slate-200"} px-4 py-3 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-500 bg-white`}
               >
                 <option value="">เลือกหมวดหมู่</option>
                 <option value="Technology">Technology</option>
