@@ -23,12 +23,12 @@ async function findUserByEmail(email) {
 /**
  * บันทึก User ใหม่
  */
-async function createUser({ email, name, password, role = 'Student' }) {
+async function createUser({ email, name, password, role = 'student' }) {
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
 
   const query = `
-    INSERT INTO ${qualify("users")} (email, name, password_hash, role, status)
+    INSERT INTO ${qualify("users")} (email, name, password_hash, role , status)
     VALUES ($1, $2, $3, $4, $5)
     RETURNING id, email, name, role, status, created_at AS "createdAt"
   `;

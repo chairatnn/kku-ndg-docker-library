@@ -10,9 +10,18 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const API_BASE = "/api";
 
+  // 🚩 1. เพิ่ม State สำหรับเก็บข้อมูลผู้ใช้ที่กำลัง Login
+  const [me, setMe] = useState(null);
+
   useEffect(() => {
+    // 🚩 2. ดึงข้อมูลตัวเราเองจาก localStorage
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    setMe(storedUser);
     fetchUsers();
   }, []);
+
+  // 🚩 3. สร้างตัวแปรช่วยเช็คว่าเป็น Admin
+  const isAdmin = me?.role?.toLowerCase() === "admin";
 
   const fetchUsers = async () => {
     try {
@@ -63,6 +72,11 @@ export default function UsersPage() {
   }, [users, searchTerm]);
 
   const handleDelete = async (id, name) => {
+    // 🚩 4. ป้องกันที่ฟังก์ชัน handleDelete
+    if (!isAdmin) {
+      alert("เฉพาะ Admin เท่านั้นที่มีสิทธิ์ลบผู้ใช้งาน");
+      return;
+    }
     if (!confirm(`ยืนยันการลบผู้ใช้: ${name}?`)) return;
     try {
       const token = localStorage.getItem("accessToken");
@@ -77,6 +91,11 @@ export default function UsersPage() {
   };
 
   const handleSave = async () => {
+    // 🚩 5. ป้องกันที่ฟังก์ชัน handleSave
+    if (!isAdmin) {
+      alert("เฉพาะ Admin เท่านั้นที่มีสิทธิ์จัดการข้อมูล");
+      return;
+    }
     try {
       const token = localStorage.getItem("accessToken");
       // ถ้าเป็นโหมด add ใช้ POST ถ้าเป็น edit ใช้ PUT
@@ -117,14 +136,19 @@ export default function UsersPage() {
             <h1 className="text-3xl font-bold text-slate-900">
               จัดการผู้ใช้งาน
             </h1>
-            <p className="text-slate-500">เพิ่ม แก้ไข ลบ ผู้ใช้งานในระบบ</p>
+            <p className="text-slate-500">
+              เรียกดูและจัดการข้อมูลผู้ใช้งานในระบบ
+            </p>
           </div>
-          <button
-            onClick={openAddModal}
-            className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-slate-800 transition-all"
-          >
-            <Plus size={20} /> เพิ่มผู้ใช้
-          </button>
+          {/* 🚩 6. แสดงปุ่มเพิ่มผู้ใช้เฉพาะ Admin */}
+          {isAdmin && (
+            <button
+              onClick={openAddModal}
+              className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-slate-800 transition-all"
+            >
+              <Plus size={20} /> เพิ่มผู้ใช้
+            </button>
+          )}
         </div>
 
         {/* Search Bar */}
@@ -211,18 +235,23 @@ export default function UsersPage() {
                       >
                         <Eye size={18} />
                       </button>
-                      <button
-                        onClick={() => openEditModal(u, "edit")}
-                        className="p-2 text-slate-400 hover:text-slate-900"
-                      >
-                        <Edit2 size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(u.id, u.name)}
-                        className="p-2 text-slate-400 hover:text-rose-500"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      {/* 🚩 8. ปุ่ม "แก้ไข" และ "ลบ" แสดงเฉพาะ Admin */}
+                      {isAdmin && (
+                        <>
+                          <button
+                            onClick={() => openEditModal(u, "edit")}
+                            className="p-2 text-slate-400 hover:text-slate-900"
+                          >
+                            <Edit2 size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(u.id, u.name)}
+                            className="p-2 text-slate-400 hover:text-rose-500"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -259,7 +288,9 @@ export default function UsersPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm text-black font-bold mb-2">อีเมล</label>
+                <label className="block text-sm text-black font-bold mb-2">
+                  อีเมล
+                </label>
                 <input
                   type="email"
                   disabled={modalMode === "view"}
