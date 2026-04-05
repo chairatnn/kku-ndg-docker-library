@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Toast from '../components/Toast';
+import { useState } from "react";
+import Toast from "../components/Toast";
 
 export default function RegisterPage() {
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [toastOpen, setToastOpen] = useState(false);
-  const [toastVariant, setToastVariant] = useState('info');
-  const [toastMessage, setToastMessage] = useState('');
+  const [toastVariant, setToastVariant] = useState("info");
+  const [toastMessage, setToastMessage] = useState("");
 
   function showToast(variant, message) {
     setToastVariant(variant);
@@ -20,44 +20,52 @@ export default function RegisterPage() {
   }
 
   function mapCreateUserError(json) {
-    if (json?.message === 'Email already exists') return 'อีเมลนี้ถูกใช้งานแล้ว';
+    if (json?.message === "Email already exists")
+      return "อีเมลนี้ถูกใช้งานแล้ว";
 
-    if (json?.message === 'Validation failed' && Array.isArray(json?.errors)) {
+    if (json?.message === "Validation failed" && Array.isArray(json?.errors)) {
       const first = json.errors[0];
-      if (first?.field && first?.reason) return `${first.field}: ${first.reason}`;
-      return 'ข้อมูลไม่ถูกต้อง';
+      if (first?.field && first?.reason)
+        return `${first.field}: ${first.reason}`;
+      return "ข้อมูลไม่ถูกต้อง";
     }
 
-    return json?.message || 'สร้างผู้ใช้ไม่สำเร็จ';
+    return json?.message || "สร้างผู้ใช้ไม่สำเร็จ";
   }
 
   async function onSubmit(e) {
     e.preventDefault();
     setToastOpen(false);
 
+    // 🚩 ดักความยาวรหัสผ่าน
+    if (password.length < 8) {
+      showToast("error", "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร");
+      return;
+    }
+
     if (!email.trim() || !name.trim() || !password) {
-      showToast('error', 'กรุณากรอกข้อมูลให้ครบ');
+      showToast("error", "กรุณากรอกข้อมูลให้ครบ");
       return;
     }
 
     setLoading(true);
     try {
-      const resp = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const resp = await fetch("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, name, password }),
       });
       const json = await resp.json();
 
       if (!resp.ok) {
-        showToast('error', mapCreateUserError(json));
+        showToast("error", mapCreateUserError(json));
         return;
       }
 
-      showToast('success', 'สร้างผู้ใช้สำเร็จ');
-      window.location.href = '/login';
+      showToast("success", "สร้างผู้ใช้สำเร็จ");
+      window.location.href = "/login";
     } catch {
-      showToast('error', 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้');
+      showToast("error", "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     } finally {
       setLoading(false);
     }
@@ -116,12 +124,15 @@ export default function RegisterPage() {
           className="w-full rounded-md bg-black px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
           disabled={loading}
         >
-          {loading ? 'Creating...' : 'Create'}
+          {loading ? "Creating..." : "Create"}
         </button>
       </form>
 
       <p className="text-sm text-gray-600">
-        มีบัญชีแล้ว? <a className="underline" href="/login">ไปหน้า login</a>
+        มีบัญชีแล้ว?{" "}
+        <a className="underline" href="/login">
+          ไปหน้า login
+        </a>
       </p>
     </main>
   );

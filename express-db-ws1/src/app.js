@@ -10,6 +10,7 @@ const authRouter = require('./routes/auth.routes');
 const meRouter = require('./routes/me.routes');
 const borrowsRouter = require('./routes/borrows.routes');
 const returnsRouter = require('./routes/returns.routes');
+const systemRoutes = require('./routes/system.routes');
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use('/auth', authRouter);
 app.use('/me', meRouter);
 app.use('/api/borrows', borrowsRouter);
 app.use('/api/returns', returnsRouter);
+app.use('/api/system', systemRoutes);
 
 // --- 3. Middlewares (ต้องอยู่ท้ายสุดเสมอ) ---
 const notFound = require("./middlewares/notFound");
