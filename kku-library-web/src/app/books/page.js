@@ -1,6 +1,6 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
@@ -17,6 +17,7 @@ export default function BooksPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const debounceRef = useRef(null);
+  const [userRole, setUserRole] = useState(""); // 🚩 เพิ่ม State เก็บ Role
 
   // กำหนด Base URL ไว้ที่เดียวจะได้แแก้รวดเดียวจบ
   const API_BASE = "/api";
@@ -109,6 +110,13 @@ export default function BooksPage() {
   };
 
   const handleReturn = async (borrowId) => {
+    // 🚩 เพิ่ม Guard ตรงนี้อีกจุดเพื่อความปลอดภัย 100%
+    if (!canManageBooks) {
+      alert(
+        "ขออภัย เฉพาะบรรณารักษ์เท่านั้นที่สามารถทำรายการคืนหนังสือในระบบได้",
+      );
+      return;
+    }
     const token = localStorage.getItem("accessToken");
     if (!token) return;
     try {
@@ -133,6 +141,13 @@ export default function BooksPage() {
   };
 
   const handleDelete = async (id, title) => {
+    // 🚩 ตรวจสอบสิทธิ์ก่อนทำรายการ
+    if (!canManageBooks) {
+      alert(
+        "ขออภัย เฉพาะบรรณารักษ์หรือผู้ดูแลระบบเท่านั้นที่สามารถลบหนังสือได้",
+      );
+      return;
+    }
     // สร้างการยืนยัน (Confirmation)
     if (!confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบหนังสือเรื่อง "${title}"?`))
       return;
@@ -160,8 +175,16 @@ export default function BooksPage() {
 
   useEffect(() => {
     setUserEmail(localStorage.getItem("userEmail") || "Guest");
+
+    // 🚩 ดึงค่า memberRole มาเก็บไว้
+    const role = localStorage.getItem("memberRole");
+    if (role) setUserRole(role);
+
     loadBooks("", true);
   }, []);
+
+  // 🚩 สร้างตัวแปรเช็คสิทธิ์ (ให้รองรับทั้ง Admin และ Librarian)
+  const canManageBooks = userRole === "Admin" || userRole === "Librarian";
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -176,12 +199,15 @@ export default function BooksPage() {
       <main className="p-6 bg-slate-50 min-h-screen">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6 border-b pb-4 gap-4">
           <h1 className="text-2xl font-bold text-slate-800">รายการหนังสือ</h1>
-          <Link
-            href="/books/add"
-            className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
-          >
-            <Plus className="h-4 w-4" /> เพิ่มหนังสือ
-          </Link>
+          {/* 🚩 แสดงปุ่มเฉพาะผู้ที่มีสิทธิ์จัดการเท่านั้น */}
+          {canManageBooks && (
+            <Link
+              href="/books/add"
+              className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+            >
+              <Plus className="h-4 w-4" /> เพิ่มหนังสือ
+            </Link>
+          )}
         </div>
 
         {error && (
@@ -226,21 +252,25 @@ export default function BooksPage() {
                     <Eye className="h-4 w-4" />
                   </button>
 
-                  {/* ปุ่มแก้ไข (Step 7) */}
-                  <Link
-                    href={`/books/${book.id}/edit`}
-                    className="p-2 bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-600 rounded-lg transition"
-                    title="แก้ไขข้อมูล"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Link>
-                  <button
-                    onClick={() => handleDelete(book.id, book.title)}
-                    className="p-1.5 bg-white/80 backdrop-blur-sm hover:bg-rose-50 text-slate-800 hover:text-rose-600 rounded-full shadow-sm border border-slate-100 transition"
-                    title="ลบหนังสือ"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  {/* 🚩 แสดงปุ่มแก้ไขและลบ เฉพาะ Admin/Librarian */}
+                  {canManageBooks && (
+                    <>
+                      <Link
+                        href={`/books/${book.id}/edit`}
+                        className="p-2 bg-slate-100 hover:bg-amber-100 text-slate-600 hover:text-amber-600 rounded-lg transition"
+                        title="แก้ไขข้อมูล"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Link>
+                      <button
+                        onClick={() => handleDelete(book.id, book.title)}
+                        className="p-1.5 bg-white/80 backdrop-blur-sm hover:bg-rose-50 text-slate-800 hover:text-rose-600 rounded-full shadow-sm border border-slate-100 transition"
+                        title="ลบหนังสือ"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 <div>
@@ -285,17 +315,31 @@ export default function BooksPage() {
                     >
                       ยืมหนังสือ
                     </button>
-                  ) : book.can_return ? (
-                    <button
-                      onClick={() => handleReturn(book.borrow_id)}
-                      className="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition"
-                    >
-                      คืนหนังสือ
-                    </button>
                   ) : (
-                    <div className="w-full bg-slate-100 text-slate-500 px-4 py-2 rounded-lg text-center text-sm">
-                      ไม่ว่าง (ถูกยืมโดยผู้อื่น)
-                    </div>
+                    /* --- กรณีหนังสือไม่ว่าง (ถูกยืมอยู่): แบ่งตามสิทธิ์ --- */
+                    <>
+                      {canManageBooks ? (
+                        // Admin/Librarian: เห็นปุ่มกดคืนได้ทันที (คืนให้ใครก็ได้)
+                        <button
+                          onClick={() => handleReturn(book.borrow_id)}
+                          className="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition"
+                        >
+                          คืนหนังสือ (Admin/Librarian)
+                        </button>
+                      ) : (
+                        // Student: เห็นปุ่มสีเทา/ส้ม ที่กดแล้วขึ้นแจ้งเตือน (กันเด็กกดคืนเอง)
+                        <button
+                          onClick={() =>
+                            alert(
+                              "กรุณานำหนังสือมาคืนที่บรรณารักษ์เพื่อทำรายการในระบบ",
+                            )
+                          }
+                          className="w-full bg-slate-100 text-slate-500 px-4 py-2 rounded-lg text-center text-sm cursor-default"
+                        >
+                          ติดต่อคืนที่บรรณารักษ์
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
