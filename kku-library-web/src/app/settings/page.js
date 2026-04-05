@@ -6,7 +6,7 @@ import {
   ShieldCheck,
   BookOpen,
   User,
-  Github,
+  Code2,
   ExternalLink,
   Layers,
 } from "lucide-react";
@@ -147,7 +147,7 @@ export default function SettingsPage() {
                   href="#"
                   className="flex items-center gap-2 text-xs font-bold bg-white/10 hover:bg-white/20 p-3 rounded-xl transition"
                 >
-                  <Github className="h-4 w-4" />
+                  <Code2 className="h-4 w-4" />
                   Source Code on GitHub
                 </a>
               </div>
