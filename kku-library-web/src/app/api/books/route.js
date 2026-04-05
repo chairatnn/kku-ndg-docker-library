@@ -20,6 +20,11 @@ export async function GET(request) {
       targetUrl.searchParams.set('search', search);
     }
 
+    // 🚩 เพิ่มบรรทัดนี้: ถ้ามี userId ส่งมาจากหน้าบ้าน ให้ส่งต่อให้ Backend ด้วย
+    if (userId) {
+      targetUrl.searchParams.set('userId', userId);
+    }
+
     // 2. ส่ง Request ต่อไปยัง Render (ให้ Backend เป็นคนจัดการเรื่อง JWT เอง)
     const resp = await fetch(targetUrl.toString(), {
       method: 'GET',
