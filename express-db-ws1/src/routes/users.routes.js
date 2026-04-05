@@ -69,8 +69,25 @@ router.put("/:id", authRequired, async (req, res, next) => {
     const { name, email, role } = req.body;
     const userId = req.params.id;
 
-    // เขียน Logic อัปเดตที่ Repository ของคุณ (เช่น usersRepo.updateUser)
-    // สำหรับตอนนี้ ถ้ายังไม่ได้เขียนฟังก์ชันอัปเดต ปุ่มแก้ไขจะ Error 404 นะครับ
+    // 🚩 1. ตรวจสอบว่ามีข้อมูลส่งมาไหม
+    if (!name || !email || !role) {
+      return res.status(400).json({ message: "กรุณาระบุข้อมูลให้ครบถ้วน" });
+    }
+
+    // 🚩 2. เรียกใช้ Repository เพื่ออัปเดตจริง (ต้องไปสร้าง updateUser ใน repo ด้วย)
+    const updatedUser = await usersRepo.updateUser(userId, {
+      name,
+      email,
+      role,
+    });
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ message: "ไม่พบผู้ใช้งานที่ต้องการอัปเดต" });
+    }
+
+    // เขียน Logic อัปเดตที่ Repository (เช่น usersRepo.updateUser)
     res.json({ message: "Update success (Backend logic needed here)" });
   } catch (error) {
     next(error);

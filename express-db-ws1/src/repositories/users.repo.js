@@ -63,6 +63,21 @@ async function listAllUsers() {
 }
 
 /**
+ * อัปเดตข้อมูลผู้ใช้งาน (ชื่อ, อีเมล, บทบาท)
+ */
+async function updateUser(id, { name, email, role }) {
+  const sql = `
+    UPDATE ${qualify("users")}
+    SET name = $1, email = $2, role = $3
+    WHERE id = $4
+    RETURNING id, name, email, role, status
+  `;
+  const values = [name, email, role, id];
+  const result = await pool.query(sql, values);
+  return result.rows[0];
+}
+
+/**
  * ลบผู้ใช้งาน
  */
 async function deleteUser(id) {
@@ -75,5 +90,6 @@ module.exports = {
   createUser,
   listUsers,    // สำหรับหน้าจัดการ
   listAllUsers, // สำหรับ Dropdown
-  deleteUser
+  deleteUser,
+  updateUser
 };

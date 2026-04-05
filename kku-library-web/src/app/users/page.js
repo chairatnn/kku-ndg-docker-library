@@ -76,52 +76,60 @@ export default function UsersPage() {
   }, [users, searchTerm]);
 
   const handleDelete = async (id, name) => {
-    // 🚩 4. ป้องกันที่ฟังก์ชัน handleDelete
-    if (!isAdmin) {
-      alert("เฉพาะ Admin เท่านั้นที่มีสิทธิ์ลบผู้ใช้งาน");
-      return;
-    }
+    if (!isAdmin) return alert("เฉพาะ Admin เท่านั้นที่มีสิทธิ์ลบ");
     if (!confirm(`ยืนยันการลบผู้ใช้: ${name}?`)) return;
+
     try {
       const token = localStorage.getItem("accessToken");
-      await fetch(`${API_BASE}/users/${id}`, {
+      const resp = await fetch(`${API_BASE}/users/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      fetchUsers(); // โหลดใหม่หลังลบ
+
+      if (resp.ok) {
+        // 🚩 อัปเดต State ทันที ไม่ต้องรอ fetch ใหม่
+        setUsers((prev) => prev.filter((u) => u.id !== id));
+        alert("ลบผู้ใช้งานเรียบร้อยแล้ว");
+      } else {
+        const err = await resp.json();
+        alert(err.message || "ลบไม่สำเร็จ");
+      }
     } catch (err) {
-      alert("ลบไม่สำเร็จ");
+      alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     }
   };
 
   const handleSave = async () => {
-    // 🚩 5. ป้องกันที่ฟังก์ชัน handleSave
-    if (!isAdmin) {
-      alert("เฉพาะ Admin เท่านั้นที่มีสิทธิ์จัดการข้อมูล");
-      return;
-    }
+    if (!isAdmin) return alert("เฉพาะ Admin เท่านั้นที่มีสิทธิ์จัดการข้อมูล");
+
     try {
       const token = localStorage.getItem("accessToken");
-      // ถ้าเป็นโหมด add ใช้ POST ถ้าเป็น edit ใช้ PUT
-      const method = modalMode === "add" ? "POST" : "PUT";
-      const url =
-        modalMode === "add"
-          ? `${API_BASE}/users`
-          : `${API_BASE}/users/${currentUser.id}`;
+      const isAdd = modalMode === "add";
+      const url = isAdd
+        ? `${API_BASE}/users`
+        : `${API_BASE}/users/${currentUser.id}`;
+
+      // 🚩 เตรียมข้อมูลส่งไป Backend (ไม่ส่ง password ถ้าเป็นโหมดแก้ไขและไม่ได้กรอก)
+      const payload = {
+        name: currentUser.name,
+        email: currentUser.email,
+        role: currentUser.role,
+      };
+      if (isAdd) payload.password = currentUser.password;
 
       const resp = await fetch(url, {
-        method: method,
+        method: isAdd ? "POST" : "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(currentUser),
+        body: JSON.stringify(payload),
       });
 
       if (resp.ok) {
-        alert(modalMode === "add" ? "เพิ่มผู้ใช้สำเร็จ" : "อัปเดตข้อมูลสำเร็จ");
-        setIsModalOpen(false); // ปิด Modal
-        fetchUsers(); // โหลดตารางใหม่เพื่อให้เห็นข้อมูลล่าสุด
+        alert(isAdd ? "เพิ่มผู้ใช้สำเร็จ" : "อัปเดตข้อมูลสำเร็จ");
+        setIsModalOpen(false);
+        fetchUsers(); // รีโหลดข้อมูลทั้งหมดเพื่อให้ชัวร์
       } else {
         const err = await resp.json();
         alert(err.message || "เกิดข้อผิดพลาด");
