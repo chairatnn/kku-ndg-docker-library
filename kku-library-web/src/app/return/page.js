@@ -18,6 +18,8 @@ export default function ReturnPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(null); // เก็บ ID ที่กำลังกดคืน
 
+  const [userRole, setUserRole] = useState(""); // 🚩 เพิ่ม State เก็บ Role
+
   const API_BASE = "/api";
 
   // 1. โหลดข้อมูลรายการยืมทั้งหมด
@@ -35,7 +37,7 @@ export default function ReturnPage() {
       const resp = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       const json = await resp.json();
       if (resp.ok) {
         // กรองเอาเฉพาะรายการที่ยังไม่คืน (หรือจะโชว์ทั้งหมดแล้วแยกสถานะก็ได้)
@@ -49,8 +51,13 @@ export default function ReturnPage() {
   };
 
   useEffect(() => {
+    const role = localStorage.getItem("memberRole");
+    if (role) setUserRole(role); // 🚩 โหลด Role ตอนเข้าหน้า
     loadBorrows();
   }, []);
+
+  // 🚩 สร้างตัวแปรเช็คสิทธิ์
+  const canManageReturns = userRole === "Admin" || userRole === "Librarian";
 
   // 2. ระบบค้นหา (กรองข้อมูลในตาราง)
   const filteredBorrows = useMemo(() => {
@@ -68,6 +75,12 @@ export default function ReturnPage() {
   // 3. ฟังก์ชันดำเนินการคืนหนังสือ
   const handleReturnAction = async (id) => {
     if (!id) return;
+
+    // 🚩 ตรวจสอบสิทธิ์ที่นี่อีกครั้ง
+    if (!canManageReturns) {
+      alert("ขออภัย คุณไม่มีสิทธิ์ดำเนินการคืนหนังสือในระบบ");
+      return;
+    }
 
     // แปลงรหัสจาก BR001 เป็น 1 (ถ้าผู้ใช้กรอกแบบมี BR นำหน้า)
     const cleanId = typeof id === "string" ? id.replace(/\D/g, "") : id;
@@ -127,8 +140,14 @@ export default function ReturnPage() {
                 />
               </div>
               <button
-                onClick={() => handleReturnAction(borrowIdInput)}
-                disabled={!borrowIdInput || submitting}
+                onClick={() => {
+                  if (!canManageReturns) {
+                    alert("เฉพาะบรรณารักษ์เท่านั้นที่สามารถทำรายการคืนได้");
+                    return;
+                  }
+                  handleReturnAction(borrowIdInput);
+                }}
+                disabled={!borrowIdInput || submitting || !canManageReturns} // 🚩 Disable ถ้าไม่มีสิทธิ์
                 className="bg-slate-400 text-white px-10 py-3.5 rounded-2xl font-bold hover:bg-slate-500 disabled:opacity-50 transition-all shadow-sm"
               >
                 {submitting === borrowIdInput ? (
@@ -229,17 +248,27 @@ export default function ReturnPage() {
                       </td>
                       <td className="px-8 py-6 text-right">
                         {!item.returned_at && (
-                          <button
-                            onClick={() => handleReturnAction(item.id)}
-                            disabled={submitting === item.id.toString()}
-                            className="bg-slate-900 text-white px-5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700 transition-all flex items-center gap-2 ml-auto"
-                          >
-                            {submitting === item.id.toString() ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
+                          <>
+                            {canManageReturns ? (
+                              // 🚩 แสดงปุ่มคืนปกติสำหรับ Admin/Librarian
+                              <button
+                                onClick={() => handleReturnAction(item.id)}
+                                disabled={submitting === item.id.toString()}
+                                className="bg-slate-900 text-white px-5 py-2 rounded-xl text-xs font-bold hover:bg-slate-700 transition-all flex items-center gap-2 ml-auto"
+                              >
+                                {submitting === item.id.toString() ? (
+                                  <Loader2 className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  "คืน"
+                                )}
+                              </button>
                             ) : (
-                              "คืน"
+                              // 🚩 แสดงสถานะสำหรับ Student
+                              <span className="text-xs text-slate-400 italic">
+                                ติดต่อบรรณารักษ์เพื่อคืน
+                              </span>
                             )}
-                          </button>
+                          </>
                         )}
                       </td>
                     </tr>
