@@ -31,7 +31,7 @@ app.get('/api/dashboard/stats', async (req, res) => {
 // Routes ปกติ
 app.use('/health', healthRoutes);
 app.use('/api/books', bookRoutes);
-app.use("/users", usersRoutes);
+app.use("/api/users", usersRoutes);
 app.use('/auth', authRouter);
 app.use('/me', meRouter);
 app.use('/api/borrows', borrowsRouter);
