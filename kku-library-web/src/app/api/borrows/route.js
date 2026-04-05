@@ -44,3 +44,29 @@ export async function POST(request) {
     );
   }
 }
+
+export async function GET(request) {
+  try {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL;
+    const authHeader = request.headers.get('authorization');
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId'); // สำหรับกรองเฉพาะของตัวเอง
+
+    let targetUrl = `${backendUrl}/api/borrows`;
+    if (userId) targetUrl += `?userId=${userId}`;
+
+    const resp = await fetch(targetUrl, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(authHeader ? { 'Authorization': authHeader } : {}),
+      },
+      cache: 'no-store'
+    });
+
+    const data = await resp.json();
+    return NextResponse.json(data);
+  } catch (error) {
+    return NextResponse.json({ message: "Proxy GET Borrows Error" }, { status: 500 });
+  }
+}
