@@ -96,10 +96,22 @@ async function listAvailableBooks() {
   return result.rows;
 }
 
+async function listAllUsers() {
+  const sql = `
+    SELECT id, name, email 
+    FROM ${qualify("users")} 
+    WHERE role != 'admin' -- หรือถ้าอยากให้เลือก admin ด้วยก็เอาบรรทัดนี้ออก
+    ORDER BY name ASC
+  `;
+  const result = await pool.query(sql);
+  return result.rows;
+}
+
 module.exports = {
   bookExists,
   borrowBook,
   listAllBorrows,
   listBorrowsByUser,
   listAvailableBooks,
+  listAllUsers,
 };

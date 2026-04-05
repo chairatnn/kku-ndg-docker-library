@@ -48,9 +48,9 @@ router.post('/', authRequired, async (req, res, next) => {
     if (!userId) return res.status(400).json({ message: 'userId is required' });
 
     const borrow = await borrowsService.borrowBook({
-      userId: Number(req.user.sub),
-      bookId,
-      dueDate,
+      userId: Number(req.body.userId),
+      bookId: Number(req.body.bookId),
+      dueDate: req.body.dueDate,
     });
 
     res.status(201).json({ data: borrow });
