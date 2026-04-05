@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -23,9 +25,9 @@ export default function BooksPage() {
     if (showLoading) setLoading(true);
     try {
       const token = localStorage.getItem("accessToken");
-      const userId = localStorage.getItem("userId");
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = storedUser.id || localStorage.getItem("userId");
       const url = `${API_BASE}/books?search=${encodeURIComponent(query)}${userId ? `&userId=${userId}` : ""}`;
-      // const url = `/api/books?search=${encodeURIComponent(query)}`;
 
       const resp = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},

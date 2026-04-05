@@ -5,6 +5,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
     const search = searchParams.get('search') || '';
+    const userId = searchParams.get('userId');
     
     const backendUrl = process.env.NEXT_PUBLIC_API_URL;
     const authHeader = request.headers.get('Authorization');
