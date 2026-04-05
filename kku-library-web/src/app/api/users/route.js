@@ -11,7 +11,7 @@ export async function GET(request) {
     }
 
     // ยิงไปที่ Render (เช็คว่า Backend ของคุณใช้ /api/users หรือ /users)
-    const resp = await fetch(`${backendUrl}/users`, {
+    const resp = await fetch(`${backendUrl}/api/users`, {
       method: 'GET',
       headers: { 
         'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ export async function POST(request) {
     }
 
     // 2. ยิงไปที่ Render พร้อมแนบ Token ไปด้วย
-    const resp = await fetch(`${backendUrl}/users`, {
+    const resp = await fetch(`${backendUrl}/api/users`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
