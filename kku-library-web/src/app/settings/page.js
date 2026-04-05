@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Info,
   ShieldCheck,
@@ -68,7 +69,7 @@ export default function SettingsPage() {
                 <div>
                   <p className="text-slate-400 mb-1">Version</p>
                   <p className="font-semibold text-slate-700">
-                    {systemInfo.version}
+                    {systemData?.version || systemInfo.version}
                   </p>
                 </div>
                 <div>
