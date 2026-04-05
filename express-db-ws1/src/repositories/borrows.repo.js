@@ -38,33 +38,27 @@ async function borrowBook({ userId, bookId, dueDate }) {
 }
 
 async function listAllBorrows() {
-  try {
-    // 🛠️ แก้ไข: ใช้ qualify แทนการเขียน public. ตรงๆ
-    const sql = `
-      SELECT 
-        br.id,
-        u.name AS user_name,
-        b.title AS book_title,
-        br.borrowed_at,
-        br.due_date,
-        br.returned_at,
-        CASE 
-          WHEN br.returned_at IS NOT NULL THEN 'Returned'
-          WHEN br.due_date < CURRENT_DATE THEN 'Overdue'
-          ELSE 'Borrowing' 
-        END AS status
-      FROM ${qualify("borrows")} br
-      JOIN ${qualify("users")} u ON br.user_id = u.id
-      JOIN ${qualify("books")} b ON br.book_id = b.book_id
-      ORDER BY br.returned_at IS NULL DESC, br.due_date ASC;
-    `;
-
-    const result = await pool.query(sql);
-    return result.rows;
-  } catch (error) {
-    console.error("❌ SQL Error in listAllBorrows:", error.message);
-    throw error;
-  }
+  const sql = `
+    SELECT 
+      br.id,
+      br.user_id, -- เพิ่มมาเพื่อให้ Frontend เช็คสิทธิ์ได้ง่ายขึ้น
+      u.name AS user_name,
+      b.title AS book_title,
+      br.borrowed_at,
+      br.due_date,
+      br.returned_at,
+      CASE 
+        WHEN br.returned_at IS NOT NULL THEN 'Returned'
+        WHEN br.due_date < CURRENT_DATE THEN 'Overdue'
+        ELSE 'Borrowed' -- เปลี่ยนจาก Borrowing เป็น Borrowed ให้ตรงกับมาตรฐานหน้าอื่น
+      END AS status
+    FROM ${qualify("borrows")} br
+    JOIN ${qualify("users")} u ON br.user_id = u.id
+    JOIN ${qualify("books")} b ON br.book_id = b.book_id
+    ORDER BY (br.returned_at IS NULL) DESC, br.due_date ASC;
+  `;
+  const result = await pool.query(sql);
+  return result.rows;
 }
 
 // เพิ่มฟังก์ชัน listBorrowsByUser (หน้าประวัติการยืมต้องใช้)
@@ -107,6 +101,28 @@ async function listAllUsers() {
   return result.rows;
 }
 
+/**
+ * ค้นหาข้อมูลการยืมจาก ID (เพื่อให้ Admin ตรวจสอบได้ทุกคน)
+ */
+async function findBorrowById(borrowId) {
+  const sql = `
+    SELECT 
+      br.id, 
+      br.user_id, 
+      br.book_id, 
+      br.returned_at,
+      u.name AS user_name,
+      b.title AS book_title
+    FROM ${qualify("borrows")} br
+    JOIN ${qualify("users")} u ON br.user_id = u.id
+    JOIN ${qualify("books")} b ON br.book_id = b.book_id
+    WHERE br.id = $1
+    LIMIT 1
+  `;
+  const result = await pool.query(sql, [borrowId]);
+  return result.rows[0] || null;
+}
+
 module.exports = {
   bookExists,
   borrowBook,
@@ -114,4 +130,5 @@ module.exports = {
   listBorrowsByUser,
   listAvailableBooks,
   listAllUsers,
+  findBorrowById,
 };

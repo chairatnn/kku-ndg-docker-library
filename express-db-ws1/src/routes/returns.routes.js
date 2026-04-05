@@ -8,6 +8,7 @@ router.post('/:borrowId', authRequired, async (req, res, next) => {
   try {
     const borrowId = Number(req.params.borrowId);
     const userId = req.user.sub;
+    const userRole = req.user.role;
 
     // ตรวจสอบความถูกต้องของ borrowId (400)
     if (isNaN(borrowId)) {
@@ -17,7 +18,7 @@ router.post('/:borrowId', authRequired, async (req, res, next) => {
       });
     }
 
-    const result = await returnsService.returnBook({ borrowId, userId });
+    const result = await returnsService.returnBook({ borrowId, userId, userRole });
 
     res.status(200).json({ 
       status: 'success',
