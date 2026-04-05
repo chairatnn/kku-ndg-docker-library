@@ -23,7 +23,7 @@ async function findUserByEmail(email) {
 /**
  * บันทึก User ใหม่
  */
-async function createUser({ email, name, password, role = 'student' }) {
+async function createUser({ email, name, password, role = 'Student' }) {
   const saltRounds = 10;
   const passwordHash = await bcrypt.hash(password, saltRounds);
 

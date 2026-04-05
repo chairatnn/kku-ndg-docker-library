@@ -15,13 +15,17 @@ export default function UsersPage() {
 
   useEffect(() => {
     // 🚩 2. ดึงข้อมูลตัวเราเองจาก localStorage
-    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-    setMe(storedUser);
+    // const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    // setMe(storedUser);
+    const role = localStorage.getItem("memberRole"); // ดึงจาก Key ที่เจอใน F12
+    if (role) {
+      setMe({ role: role });
+    }
     fetchUsers();
   }, []);
 
   // 🚩 3. สร้างตัวแปรช่วยเช็คว่าเป็น Admin
-  const isAdmin = me?.role?.toLowerCase() === "admin";
+  const isAdmin = me?.role === "Admin";
 
   const fetchUsers = async () => {
     try {
