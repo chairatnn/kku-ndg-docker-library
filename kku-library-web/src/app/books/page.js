@@ -324,7 +324,7 @@ export default function BooksPage() {
                           onClick={() => handleReturn(book.borrow_id)}
                           className="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-medium transition"
                         >
-                          คืนหนังสือ (Admin/Librarian)
+                          คืนหนังสือ (บรรณารักษ์)
                         </button>
                       ) : (
                         // Student: เห็นปุ่มสีเทา/ส้ม ที่กดแล้วขึ้นแจ้งเตือน (กันเด็กกดคืนเอง)

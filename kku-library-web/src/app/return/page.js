@@ -24,9 +24,18 @@ export default function ReturnPage() {
   const loadBorrows = async () => {
     try {
       const token = localStorage.getItem("accessToken");
-      const resp = await fetch(`${API_BASE}/borrows?scope=all`, {
+      const role = localStorage.getItem("memberRole"); // 🚩 ดึง Role มาเช็ค
+
+      // 🚩 ถ้าเป็น Admin/Librarian ให้ใส่ query string ?scope=all
+      const url =
+        role === "Admin" || role === "Librarian"
+          ? `${API_BASE}/borrows?scope=all`
+          : `${API_BASE}/borrows`;
+
+      const resp = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      
       const json = await resp.json();
       if (resp.ok) {
         // กรองเอาเฉพาะรายการที่ยังไม่คืน (หรือจะโชว์ทั้งหมดแล้วแยกสถานะก็ได้)

@@ -50,22 +50,31 @@ export default function LoginPage() {
 
       // --- ส่วนที่ปรับปรุงใหม่ ---
       localStorage.setItem("accessToken", json.accessToken);
-
-      // บันทึก Email ลงใน localStorage เพื่อให้หน้า Books นำไปแสดงผล
-      // โดยใช้ค่า email จาก input ที่ผู้ใช้พิมพ์เข้ามา (ซึ่งผ่านการตรวจสอบจาก server แล้ว)
       localStorage.setItem("userEmail", email.trim().toLowerCase());
 
-      // เก็บ userId ไว้ด้วยเผื่อใช้ในฟีเจอร์อื่นๆ (ถ้า server ส่งกลับมาใน json.user.id)
-      const userId = json.user?.id || json.userId || json.id;
+      // 🚩 1. ดึงข้อมูล User จาก Response (ตรวจสอบโครงสร้างที่ Server ส่งกลับมา)
+      const userData = json.user || json.data || {};
+      const userId = userData.id || json.userId || json.id;
+      const userRole = userData.role || json.role; // ดึง Role จากที่ Server ส่งมา
+
+      // 🚩 2. บันทึกบทบาท (Role) ลง LocalStorage (สำคัญมาก!)
+      if (userRole) {
+        localStorage.setItem("memberRole", userRole);
+        console.log("✅ บันทึก Role สำเร็จ:", userRole);
+      } else {
+        console.warn(
+          "⚠️ Server ไม่ได้ส่ง Role กลับมา อาจทำให้ปุ่มจัดการไม่ปรากฏ",
+        );
+      }
 
       if (userId) {
-        localStorage.setItem("userId", String(userId)); // บันทึกเป็น String เสมอ
+        localStorage.setItem("userId", String(userId));
         console.log("✅ บันทึก userId สำเร็จ:", userId);
-      } else {
-        console.error(
-          "❌ Server ไม่ได้ส่ง userId กลับมาในรูปแบบที่คาดไว้:",
-          json,
-        );
+      }
+
+      // เก็บชื่อ (ถ้ามี)
+      if (userData.name) {
+        localStorage.setItem("memberName", userData.name);
       }
       // -----------------------
 

@@ -31,7 +31,7 @@ async function login({ email, password }) {
 
   const accessToken = signAccessToken({
     sub: String(user.id),
-    role: user.role || "user",
+    role: user.role || "Student",
     email: user.email,
   });
 
@@ -40,7 +40,7 @@ async function login({ email, password }) {
     user: {
       id: user.id,
       email: user.email,
-      role: user.role || "user",
+      role: user.role || "Student",
     },
   };
 }

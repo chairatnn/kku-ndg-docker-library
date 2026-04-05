@@ -1,13 +1,13 @@
-const express = require('express');
-const authRequired = require('../middlewares/authRequired');
-const borrowsService = require('../services/borrows.service');
-const borrowsRepo = require('../repositories/borrows.repo');
-const usersRepo = require('../repositories/users.repo');
+const express = require("express");
+const authRequired = require("../middlewares/authRequired");
+const borrowsService = require("../services/borrows.service");
+const borrowsRepo = require("../repositories/borrows.repo");
+const usersRepo = require("../repositories/users.repo");
 
 const router = express.Router();
 
 // ดึงข้อมูลสำหรับ Dropdown ในหน้ายืม
-router.get('/options', authRequired, async (req, res, next) => {
+router.get("/options", authRequired, async (req, res, next) => {
   try {
     const users = await usersRepo.listAllUsers();
     const books = await borrowsRepo.listAvailableBooks(); // หรือเรียกผ่าน booksRepo
@@ -18,20 +18,19 @@ router.get('/options', authRequired, async (req, res, next) => {
 });
 
 // --- 1. GET: ดึงรายการยืมทั้งหมด (สำหรับหน้า Return และ Admin) ---
-router.get('/', authRequired, async (req, res, next) => {
+router.get("/", authRequired, async (req, res, next) => {
   try {
-    const { scope } = req.query;
-    let borrows;
+    const userRole = req.user.role;
+    const userId = Number(req.user.sub);
 
-    if (scope === 'all') {
-      // ดึงทั้งหมด (สำหรับบรรณารักษ์/หน้า Return)
-      borrows = await borrowsRepo.listAllBorrows(); 
-    } else {
-      // ดึงเฉพาะของ User ที่ Login อยู่ (สำหรับหน้า History ส่วนตัว)
-      const userId = Number(req.user.sub);
-      borrows = await borrowsRepo.listBorrowsByUser(userId);
+    // 🚩 ถ้าเป็น Admin/Librarian ให้ดึงทั้งหมดทันที
+    if (userRole === "Admin" || userRole === "Librarian") {
+      const borrows = await borrowsRepo.listAllBorrows();
+      return res.json({ data: borrows });
     }
 
+    // ถ้าเป็นคนทั่วไป เห็นแค่ของตัวเอง
+    const borrows = await borrowsRepo.listBorrowsByUser(userId);
     res.json({ data: borrows });
   } catch (err) {
     next(err);
@@ -39,13 +38,13 @@ router.get('/', authRequired, async (req, res, next) => {
 });
 
 // --- 2. POST: ยืมหนังสือ ---
-router.post('/', authRequired, async (req, res, next) => {
+router.post("/", authRequired, async (req, res, next) => {
   try {
     const bookId = Number(req.body?.bookId);
     const userId = Number(req.body?.userId);
     const dueDate = req.body?.dueDate;
 
-    if (!userId) return res.status(400).json({ message: 'userId is required' });
+    if (!userId) return res.status(400).json({ message: "userId is required" });
 
     const borrow = await borrowsService.borrowBook({
       userId: Number(req.body.userId),
@@ -55,7 +54,8 @@ router.post('/', authRequired, async (req, res, next) => {
 
     res.status(201).json({ data: borrow });
   } catch (err) {
-    if (err && err.status) return res.status(err.status).json({ message: err.message });
+    if (err && err.status)
+      return res.status(err.status).json({ message: err.message });
     next(err);
   }
 });
