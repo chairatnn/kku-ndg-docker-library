@@ -137,7 +137,7 @@ export default function AppShell({ children }) {
       >
         <div className="flex h-16 items-center gap-2 border-b border-slate-200 px-6">
           <BookOpen className="h-6 w-6 text-slate-900" />
-          <span className="text-lg font-bold text-slate-900">KKU Library</span>
+          <span className="text-lg font-bold text-slate-900">ABC Library</span>
         </div>
 
         <nav className="flex-1 space-y-1 p-4">

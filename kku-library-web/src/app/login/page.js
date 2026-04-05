@@ -100,7 +100,7 @@ export default function LoginPage() {
       <div className="space-y-1 text-center">
         <h1 className="text-2xl font-bold text-slate-400">Login</h1>
         <p className="text-sm text-gray-400">
-          เข้าสู่ระบบ KKU Library Backoffice
+          เข้าสู่ระบบ ABC Library Backoffice
         </p>
       </div>
 

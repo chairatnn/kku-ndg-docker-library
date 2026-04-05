@@ -47,7 +47,7 @@ export default function SettingsPage() {
             ตั้งค่าและข้อมูลระบบ
           </h1>
           <p className="text-slate-500 mt-2">
-            รายละเอียดเกี่ยวกับแอปพลิเคชัน KKU Library Backoffice
+            รายละเอียดเกี่ยวกับแอปพลิเคชัน ABC Library Backoffice
           </p>
         </div>
 
@@ -63,7 +63,7 @@ export default function SettingsPage() {
                 <div>
                   <p className="text-slate-400 mb-1">Application Name</p>
                   <p className="font-semibold text-slate-700">
-                    KKU Library Backoffice
+                    ABC Library Backoffice
                   </p>
                 </div>
                 <div>
@@ -183,7 +183,7 @@ export default function SettingsPage() {
 
         {/* Footer info */}
         <p className="text-center text-slate-400 text-xs py-10">
-          © 2026 KKU Library Backoffice Project. All rights reserved.
+          © 2026 ABC Library Backoffice Project. All rights reserved.
         </p>
       </main>
     </ProtectedRoute>

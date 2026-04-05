@@ -97,7 +97,7 @@ export default async function HealthPage() {
             </section>
 
             <p className="text-center text-slate-400 text-xs">
-                KKU Library Health Monitor Node: {typeof window === 'undefined' ? 'Edge Runtime' : 'Client'}
+                ABC Library Health Monitor Node: {typeof window === 'undefined' ? 'Edge Runtime' : 'Client'}
             </p>
         </main>
     );

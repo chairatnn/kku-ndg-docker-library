@@ -25,23 +25,23 @@ async function getBorrowById(borrowId) {
 
 /**
  * ทำการคืนหนังสือ:
- * 1. Update ตาราง borrows ตั้งค่า returned_at
- * 2. Update ตาราง books ตั้งค่า available = true
+ * 1. Update ตาราง borrows (ตั้งค่า returned_at)
+ * 2. Update ตาราง books (ตั้งค่า available = true โดยอ้างอิงจาก book_id)
  */
-async function returnBorrow({ borrowId, userId }) {
+async function returnBorrow({ borrowId }) {
   const sql = `
     WITH updated_borrow AS (
       UPDATE ${qualify('borrows')}
       SET returned_at = NOW()
       WHERE id = $1 
-        AND user_id = $2 
         AND returned_at IS NULL
       RETURNING id, user_id, book_id, borrowed_at, due_date, returned_at
     ), 
     updated_book AS (
       UPDATE ${qualify('books')}
       SET available = true
-      WHERE book_id = (SELECT book_id FROM updated_borrow) -- แก้เป็น book_id ตาม schema จริง
+      WHERE book_id = (SELECT book_id FROM updated_borrow) -- 🚩 ใช้ book_id ตรงตาม Schema
+      RETURNING book_id
     )
     SELECT 
       id, 
@@ -53,7 +53,8 @@ async function returnBorrow({ borrowId, userId }) {
     FROM updated_borrow;
   `;
   
-  const result = await pool.query(sql, [borrowId, userId]);
+  // 🚩 ส่งแค่ borrowId ตัวเดียว (เพราะลบ userId ออกจาก SQL แล้วเพื่อให้ Admin คืนแทนได้)
+  const result = await pool.query(sql, [borrowId]);
   return result.rows[0] || null;
 }
 
