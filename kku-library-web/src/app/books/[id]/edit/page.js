@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -32,6 +34,7 @@ export default function EditBookPage() {
         });
         
         const json = await resp.json();
+        console.log("Debug Edit Data:", json); // ส่องดูโครงสร้างข้อมูลที่ได้จริง
         
         if (resp.ok && json.data) {
           const { title, author, category, isbn } = json.data;
