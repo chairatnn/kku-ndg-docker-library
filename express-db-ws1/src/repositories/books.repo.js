@@ -5,7 +5,7 @@ function qualify(table) {
   return `${env.dbSchema}.${table}`;
 }
 
-async function listBooks(limit = 20, search = null, userId = null) {
+async function listBooks(limit = 100, search = null, userId = null) {
   const params = [];
 
   // เพิ่ม br.due_date เข้าไปใน SELECT เพื่อให้ Frontend นำไปแสดงผล
