@@ -4,7 +4,7 @@ const authRequired = require("../middlewares/authRequired");
 const booksRepo = require("../repositories/books.repo");
 
 router.get("/", async (req, res) => {
-  const limit = Number(req.query.limit || 20);
+  const limit = req.query.limit ? Number(req.query.limit) : 1000;
   const search = req.query.search || null;
   const userId = req.query.userId ? Number(req.query.userId) : null;
   const books = await booksRepo.listBooks(limit, search, userId);
